@@ -1,0 +1,30 @@
+[
+    {
+        "id": 1,
+        "firstName": "Kwabena",
+        "lastName": "Bawuah",
+        "email": "kBawuah@hostgator.com",
+        "password": "y0pWrGzmDz"
+    },
+    {
+        "id": 2,
+        "firstName": "Kemi",
+        "lastName": "Koku",
+        "email": "Kkoku@amazon.de",
+        "password": "G0VfMCL"
+    },
+    {
+        "id": 3,
+        "firstName": "Justin",
+        "lastName": "Abrokwah",
+        "email": "Jabrokwah@163.com",
+        "password": "3GgdWoOfT"
+    },
+    {
+        "id": 4,
+        "firstName": "Demo",
+        "lastName": "Rarah",
+        "email": "Draha@163.com",
+        "password": "3GgdWoOfT"
+    }
+]

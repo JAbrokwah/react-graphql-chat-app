@@ -1,0 +1,24 @@
+,
+    {
+        "id": 4,
+        "firstName": "Demo",
+        "lastName": "Rarah",
+        "email": "Draha@163.com",
+        "password": "3GgdWoOfT"
+    }
+
+query{
+  getAllUsers{
+    firstName
+    lastName
+    email
+  }
+}
+
+query{
+  getUserByName(name:"Kwabena"){
+    email
+    password
+  }
+}
+
