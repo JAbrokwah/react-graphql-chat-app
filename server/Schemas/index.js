@@ -10,17 +10,33 @@ const userData = require("../TestData.json");
 
 const UserType = require("./TypeDefs/UserType.js");
 
-const UserTypeMon = require("./TypeDefs/UserTypeMon");
+const User = require("./TypeDefs/UserTypeDB");
+
 
 const RootQuery = new GraphQLObjectType({
     name: "RootQueryType",
     fields: {
         getAllUsers: {
             type: new GraphQLList(UserType),
-            // args: { id: { type: GraphQLInt } },
+
             resolve(parent, args) {
-                //where we search database but for now local search
+                // local search
                 return userData;
+
+            },
+        },
+        getAllUsersDB: {
+            type: new GraphQLList(UserType),
+
+            async resolve(parent, args) {
+                try {
+                    // Use Mongoose to fetch all users from the MongoDB database
+                    const users = await User.find();
+                    console.log(`Successfully called all users in MongoDB`)
+                    return users;
+                } catch (error) {
+                    throw new Error(`Error fetching users: ${error.message}`);
+                }
             },
         },
         getUserById: {
@@ -29,7 +45,6 @@ const RootQuery = new GraphQLObjectType({
                 id: { type: GraphQLInt }
             },
             resolve(parent, args) {
-                //where we search database but for now local search
                 const userId = args.id;
                 // Find the user with the matching id in the userData array
                 const user = userData.find(user => user.id === userId);
@@ -49,12 +64,23 @@ const RootQuery = new GraphQLObjectType({
                 return user;
             },
         },
-        // getChatRoomUsers: {
-        //     type: new GraphQLList(UserType),
-        //     resolve(parent,args){
-        //         const use
-        //     }
-        // }
+        getUserByNameDB: {
+            type: UserType,
+            args: {
+                name: { type: GraphQLString }
+            },
+            async resolve(parent, args) {
+                try {
+                    const userName = args.name;
+                    // Use Mongoose to find a user by name in the MongoDB database
+                    const user = await User.findOne({ firstName: userName });
+                    console.log(`Successfully called ${args.name} from MongoDB`)
+                    return user;
+                } catch (error) {
+                    throw new Error(`Error fetching user by ${args.name}: ${error.message}`);
+                }
+            },
+        },
     },
 });
 
@@ -80,6 +106,31 @@ const Mutation = new GraphQLObjectType({
                 return args;
             },
         },
+        createUserDB: {
+            type: UserType,
+
+            args: {
+                firstName: { type: GraphQLString },
+                lastName: { type: GraphQLString },
+                email: { type: GraphQLString },
+                password: { type: GraphQLString },
+            },
+            async resolve(parent, args) {
+                try {
+                    const newUser = new User({
+                        firstName: args.firstName,
+                        lastName: args.lastName,
+                        email: args.email,
+                        password: args.password,
+                    }); // Create a new user instance
+                    await newUser.save(); // Save the user to the database
+                    console.log(`Successfully created ${args.firstName} in MongoDB`)
+                    return newUser;
+                } catch (error) {
+                    throw new Error(`Error creating a new user: ${error.message}`);
+                }
+            },
+        },
         deleteUser: {
             type: GraphQLString,
             args: {
@@ -94,6 +145,26 @@ const Mutation = new GraphQLObjectType({
                     return `User with firstName "${userName}" has been deleted.`;
                 }
                 return `User with firstName "${userName}" not found`;
+            },
+        },
+        deleteUserDB: {
+            type: GraphQLString,
+            args: {
+                name: { type: GraphQLString },
+            },
+            async resolve(parent, args) {
+                try {
+                    const userName = args.name;
+                    // delete a user by name 
+                    const result = await User.deleteOne({ firstName: userName });
+                    if (result.deletedCount > 0) {
+                        return `User with firstName "${userName}" has been deleted.`;
+                    } else {
+                        return `User with firstName "${userName}" not found`;
+                    }
+                } catch (error) {
+                    throw new Error(`Error deleting user by name: ${error.message}`);
+                }
             },
         },
     },

@@ -15,3 +15,5 @@ yarn-error.log*
 .env
 
 nodemon.json
+
+text.txt

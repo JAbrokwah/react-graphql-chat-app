@@ -22,7 +22,9 @@ app.use(
     })
 );
 
-mongoose.connect(`mongodb+srv://${mongoUser}:${mongoPassword}@graphqlchatapp.zmq2oqj.mongodb.net/`)
+//`mongodb+srv://${mongoUser}:${mongoUser}@graphqlchatapp.zmq2oqj.mongodb.net/`
+
+mongoose.connect(`mongodb+srv://${mongoUser}:${mongoPassword}@graphqlchatapp.zmq2oqj.mongodb.net/${mongoDBName}?retryWrites=true&w=majority`)
     .then(() => {
         app.listen(PORT, () => {
             console.log("Server running on 1010");
@@ -32,3 +34,7 @@ mongoose.connect(`mongodb+srv://${mongoUser}:${mongoPassword}@graphqlchatapp.zmq
         //we could add some logic for retries here
         console.log(err);
     });
+
+mongoose.connection.once("open", () => {
+    console.log("Connected to MongoDB");
+});
