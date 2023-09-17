@@ -108,13 +108,17 @@ const Mutation = new GraphQLObjectType({
         },
         createUserDB: {
             type: UserType,
-
             args: {
                 firstName: { type: GraphQLString },
                 lastName: { type: GraphQLString },
                 email: { type: GraphQLString },
                 password: { type: GraphQLString },
             },
+            //registration 
+            //all in try
+            //check input like both passwords the same
+            //hash password
+            //check if name/email exist
             async resolve(parent, args) {
                 try {
                     const newUser = new User({

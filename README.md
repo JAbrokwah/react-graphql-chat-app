@@ -78,4 +78,4 @@ To run server in dev: npm run dev
 
 else: node index.js 
 
-Meet server at: http://localhost:1010/graphql and run querries as you wish
+Meet server at: http://localhost:1010/graphql and run queries as you wish
