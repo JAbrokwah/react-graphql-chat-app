@@ -7,11 +7,15 @@ const {
     GraphQLList,
 } = graphql;
 const userData = require("../TestData.json");
-
 const UserType = require("./TypeDefs/UserType.js");
-
 const User = require("./TypeDefs/UserTypeDB");
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken')
 
+const dotenv = require('dotenv');
+dotenv.config();
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const RootQuery = new GraphQLObjectType({
     name: "RootQueryType",
@@ -26,6 +30,8 @@ const RootQuery = new GraphQLObjectType({
             },
         },
         getAllUsersDB: {
+            //TODO: based on jwt we could show this result + remove the user themselves from the result 
+            //used to see the users the user has as friends or users in a lobby 
             type: new GraphQLList(UserType),
 
             async resolve(parent, args) {
@@ -49,6 +55,48 @@ const RootQuery = new GraphQLObjectType({
                 // Find the user with the matching id in the userData array
                 const user = userData.find(user => user.id === userId);
                 return user;
+            },
+        },
+        getUserByEmailandPassDB: {
+            //something like this for login
+            type: UserType,
+            args: {
+                email: { type: GraphQLString },
+                password: { type: GraphQLString }
+            },
+            async resolve(parent, args) {
+                try {
+                    const email = args.email;
+                    const password = args.password;
+                    // Use Mongoose to find a user by name in the MongoDB database
+                    const user = await User.findOne({ email: email });
+
+                    if (!user) {
+                        throw new Error('User not found')
+                    }
+                    console.log(`Successfully called the user with email:${args.email} from MongoDB`)
+
+                    const correctPassword = await bcrypt.compare(password, user.password)
+
+                    if (!correctPassword) {
+                        throw new Error('Password is incorrect')
+                    }
+
+                    //to remove the hash from showing up
+                    user.password = null
+
+                    //way to keep track of logins (alternative to sessions)
+                    const token = jwt.sign({ email }, JWT_SECRET, {
+                        expiresIn: 60 * 60,
+                    })
+
+                    user.token = token
+                    //can be passed in context and used for calls
+
+                    return user;
+                } catch (error) {
+                    throw new Error(`Error fetching user with emails: ${args.email}: ${error.message}`);
+                }
             },
         },
         getUserByName: {
@@ -115,12 +163,29 @@ const Mutation = new GraphQLObjectType({
                 password: { type: GraphQLString },
             },
             //registration 
-            //all in try
-            //check input like both passwords the same
-            //hash password
-            //check if name/email exist
             async resolve(parent, args) {
                 try {
+                    //Validate input data to avoid running any further computations
+                    if (args.firstName.trim() === '') throw new Error('Firstname cannot be empty')
+                    if (args.lastName.trim() === '')
+                        throw new Error('LastName must not be empty')
+                    if (args.email.trim() === '')
+                        throw new Error('Email must not be empty')
+
+                    //check password same as duplicate if we decide to implement
+
+                    //already handle the duplication but proactively checking if email 
+                    //exist since it is unique / can be removed in order to optimize app/ could alternatively 
+                    //just check in catch is error message has "E11000 duplicate key error collection"
+                    //and customize error
+                    const existingUser = await User.findOne({ email: args.email });
+                    if (existingUser) {
+                        throw new Error('A user with this email already exists');
+                    }
+
+                    //password hashing
+                    args.password = await bcrypt.hash(args.password, 6)
+
                     const newUser = new User({
                         firstName: args.firstName,
                         lastName: args.lastName,
