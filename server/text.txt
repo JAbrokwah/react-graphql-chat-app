@@ -1,3 +1,6 @@
+dev
+chatapppass
+
 ,
     {
         "id": 4,
@@ -20,5 +23,9 @@ query{
     email
     password
   }
+}
+
+mutation {
+  deleteUser(name:"Demo")
 }
 

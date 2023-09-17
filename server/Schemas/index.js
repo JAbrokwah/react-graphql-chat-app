@@ -10,6 +10,8 @@ const userData = require("../TestData.json");
 
 const UserType = require("./TypeDefs/UserType.js");
 
+const UserTypeMon = require("./TypeDefs/UserTypeMon");
+
 const RootQuery = new GraphQLObjectType({
     name: "RootQueryType",
     fields: {
@@ -47,6 +49,12 @@ const RootQuery = new GraphQLObjectType({
                 return user;
             },
         },
+        // getChatRoomUsers: {
+        //     type: new GraphQLList(UserType),
+        //     resolve(parent,args){
+        //         const use
+        //     }
+        // }
     },
 });
 
