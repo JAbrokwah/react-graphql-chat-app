@@ -2,6 +2,7 @@
     "env": {
         "MONGO_USER": "XXX",
         "MONGO_PASSWORD": "XXX",
-        "MONGO_DB": "XXX"
+        "MONGO_DB": "XXX",
+        "JWT_SECRET": "XXX"
     }
 }
