@@ -70,10 +70,12 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
 
 
+Get user for MongoDB from kobby and create a nodemon.json Following the examplenodemon.json
 
+npm install
 
 To run server in dev: npm run dev
 
 else: node index.js 
 
-Meet server at: http://localhost:1010/graphql
+Meet server at: http://localhost:1010/graphql and run querries as you wish
