@@ -7,10 +7,9 @@ const {
     GraphQLList,
 } = graphql;
 const userData = require("../TestData.json");
-
 const UserType = require("./TypeDefs/UserType.js");
-
 const User = require("./TypeDefs/UserTypeDB");
+const bcrypt = require('bcryptjs');
 
 
 const RootQuery = new GraphQLObjectType({
@@ -115,12 +114,28 @@ const Mutation = new GraphQLObjectType({
                 password: { type: GraphQLString },
             },
             //registration 
-            //all in try
-            //check input like both passwords the same
-            //hash password
-            //check if name/email exist
             async resolve(parent, args) {
                 try {
+                    //Validate input data to avoid running any further computations
+                    if (args.firstName.trim() === '') throw new Error('Firstname cannot be empty')
+                    if (args.lastName.trim() === '')
+                        throw new Error('LastName must not be empty')
+                    if (args.email.trim() === '')
+                        throw new Error('Email must not be empty')
+                    if (args.password.trim() === '')
+                        throw new Error('Password must not be empty')
+
+                    //check password same as duplicate if we decide to implement
+
+                    //check if email exist since it is unique
+                    const existingUser = await User.findOne({ email: args.email });
+                    if (existingUser) {
+                        throw new Error('A user with this email already exists');
+                    }
+
+                    //password hashing
+                    args.password = await bcrypt.hash(args.password, 6)
+
                     const newUser = new User({
                         firstName: args.firstName,
                         lastName: args.lastName,
