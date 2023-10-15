@@ -21,7 +21,7 @@ function Home() {
       <h1>Welcome to Our Website</h1>
       <p>This is the home page of our website.</p>
       <div className="App">
-      {user?.aud ? (
+      {user ? (
           <div>
             <Typography variant="h6">You are logged in!!!! Route to main page when built</Typography>
             {/* <Button variant="contained" color="secondary">Logout</Button> */}

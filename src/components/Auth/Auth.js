@@ -74,6 +74,8 @@ function Auth() {
                       ) {
                           firstName
                           lastName
+                          email
+                          token
                       }
                   }
               `,
@@ -86,7 +88,7 @@ function Auth() {
             console.log(data);
             // Redirect or perform other actions as needed
 
-            localStorage.setItem('profile', JSON.stringify({...data?.payload}));
+            localStorage.setItem('profile', JSON.stringify({...data}));
 
           }
 
@@ -113,6 +115,7 @@ function Auth() {
                           firstName
                           lastName
                           email
+                          token
                       }
                   }
               `,
@@ -124,8 +127,7 @@ function Auth() {
             const {data} = await response.json();
             console.log(data);
             // Redirect or perform other actions as needed
-            localStorage.setItem('profile', JSON.stringify({...data?.payload}));
-
+            localStorage.setItem('profile', JSON.stringify({...data}));
           }
           history('/');
         } catch (error) {
