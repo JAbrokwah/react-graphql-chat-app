@@ -57,8 +57,7 @@ const RootQuery = new GraphQLObjectType({
                 return user;
             },
         },
-        getUserByEmailandPassDB: {
-            //something like this for login
+        signin: {
             type: UserType,
             args: {
                 email: { type: GraphQLString },
@@ -68,32 +67,32 @@ const RootQuery = new GraphQLObjectType({
                 try {
                     const email = args.email;
                     const password = args.password;
-                    // Use Mongoose to find a user by name in the MongoDB database
-                    const user = await User.findOne({ email: email });
+                    // Use Mongoose to find a user by email in the MongoDB database
+                    const existingUser = await User.findOne({ email: email });
 
-                    if (!user) {
+                    if (!existingUser) {
                         throw new Error('User not found')
                     }
                     console.log(`Successfully called the user with email:${args.email} from MongoDB`)
 
-                    const correctPassword = await bcrypt.compare(password, user.password)
+                    const correctPassword = await bcrypt.compare(password, existingUser.password)
 
                     if (!correctPassword) {
                         throw new Error('Password is incorrect')
                     }
 
                     //to remove the hash from showing up
-                    user.password = null
+                    existingUser.password = null
 
-                    //way to keep track of logins (alternative to sessions)
-                    const token = jwt.sign({ email }, JWT_SECRET, {
-                        expiresIn: 60 * 60,
+                    const token = jwt.sign({ email : existingUser.email, id:existingUser._id }, JWT_SECRET, {
+                    // const token = jwt.sign({ email : existingUser.email }, JWT_SECRET, {
+                        expiresIn: "1h",
                     })
 
-                    user.token = token
+                    existingUser.token = token
                     //can be passed in context and used for calls
 
-                    return user;
+                    return existingUser;
                 } catch (error) {
                     throw new Error(`Error fetching user with emails: ${args.email}: ${error.message}`);
                 }
@@ -194,7 +193,76 @@ const Mutation = new GraphQLObjectType({
                     }); // Create a new user instance
                     await newUser.save(); // Save the user to the database
                     console.log(`Successfully created ${args.firstName} in MongoDB`)
+
+                    const token = jwt.sign({ email : newUser.email }, JWT_SECRET, {
+                        expiresIn: "1h",
+                    })
+
+                    newUser.token = token
+
                     return newUser;
+                } catch (error) {
+                    throw new Error(`Error creating a new user: ${error.message}`);
+                }
+            },
+        },
+        signup: {
+            type: UserType,
+            args: {
+                firstName: { type: GraphQLString },
+                lastName: { type: GraphQLString },
+                email: { type: GraphQLString },
+                password: { type: GraphQLString },
+                confirmPassword: { type: GraphQLString },
+            },
+            //registration 
+            async resolve(parent, args) {
+                try {
+                    //Validate input data to avoid running any further computations
+                    if (args.firstName.trim() === '') throw new Error('Firstname cannot be empty')
+                    if (args.lastName.trim() === '')
+                        throw new Error('LastName must not be empty')
+                    if (args.email.trim() === '')
+                        throw new Error('Email must not be empty')
+
+                    //already handle the duplication but proactively checking if email 
+                    //exist since it is unique / can be removed in order to optimize app/ could alternatively 
+                    //just check in catch is error message has "E11000 duplicate key error collection"
+                    //and customize error
+                    const existingUser = await User.findOne({ email: args.email });
+
+                    if (existingUser) {
+                        throw new Error('A user with this email already exists');
+                    }
+
+                    if (args.password != args.confirmPassword){
+                        throw new Error("Password don't match");
+                    }
+
+                    //password hashing
+                    args.password = await bcrypt.hash(args.password, 12)
+
+                    const newUser = new User({
+                        firstName: args.firstName,
+                        lastName: args.lastName,
+                        email: args.email,
+                        password: args.password,
+                    }); // Create a new user instance
+
+                    const result = await newUser.save(); // Save the user to the database
+                    console.log(`Successfully created ${args.firstName} in MongoDB`)
+
+                    const token = jwt.sign({ email : result.email, id:result._id }, JWT_SECRET, {
+                        // const token = jwt.sign({ email : existingUser.email }, JWT_SECRET, {
+                            expiresIn: "1h",
+                    })
+
+                    result.token = token
+
+                    console.log("saved user---->>")
+                    console.log(result)
+
+                    return result;
                 } catch (error) {
                     throw new Error(`Error creating a new user: ${error.message}`);
                 }
