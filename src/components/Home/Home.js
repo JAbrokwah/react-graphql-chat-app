@@ -30,6 +30,7 @@ function Home() {
           if (token < currentTimestamp) {
             // Token has expired
             console.log("Google login token has expired");
+            logout();
           } else {
             // Token is still valid
             console.log("Google login token is still valid");
