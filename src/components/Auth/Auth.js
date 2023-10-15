@@ -6,9 +6,6 @@ import { GoogleLogin } from '@react-oauth/google';
 
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 
-import Icon from './icon';
-// import { signin, signup } from '../../actions/auth';
-import { AUTH } from '../../constants/actionTypes';
 import useStyles from './styles';
 import Input from './Input';
 
@@ -37,8 +34,11 @@ function Auth() {
     };
 
     useEffect(() => {
-        const token = user?.aud;
-    
+        const token = user?.token;
+
+        console.log("to check out on expire")
+        console.log(token)
+
         // if (token) {
         //   const decodedToken = decode(token);
     
