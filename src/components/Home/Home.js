@@ -40,8 +40,8 @@ function Home() {
 
   const logout = () => {
     localStorage.clear();
-    history("/");
     setUser(null);
+    history("/auth");
   };
 
   useEffect(() => {
